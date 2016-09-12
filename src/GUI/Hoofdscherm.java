@@ -1,0 +1,315 @@
+package GUI;
+
+import Simulatie.Wereld;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Window;
+import Simulatie.BasisObject;
+import java.awt.Point;
+import javax.swing.JOptionPane;
+
+/** Deze klasse beheerd alles omtrend het hoofdscherm
+ * 
+ * @author Richard
+ */
+public class Hoofdscherm extends javax.swing.JFrame {
+    private Wereld eng; // Referentie naar het Engine object
+    
+    // Het aantal pixels dat het veld verschoven is ( (0,0) ligt onder de titelbalk)
+    private int FieldOffsetX = 3;
+    private int FieldOffsetY = 25;
+    
+    private Graphics bufferGraphics;
+    Image offscreen;
+    
+    /**
+     * Creates new form Simulatie
+     */
+    public Hoofdscherm() {
+        Integer xPos, yPos;
+        
+        initComponents();
+        
+        this.setVisible(true);
+        this.setSize(FieldOffsetX + Wereld.getCellSize() * Wereld.getFieldSize() + 4, FieldOffsetY + Wereld.getCellSize() * Wereld.getFieldSize() + 50);
+        
+        /*
+         * Bepaal de initiële world-id en locatie van het scherm a.d.h.v. het
+         * open aantal speelgoedbeesten windows.
+        */
+        Integer numProcs = 0;
+        for (Window window : Window.getWindows())
+            if (window.getClass().toString().equals("class GUI.Hoofdscherm"))
+                numProcs++;
+        
+        // Indien er inclusief deze instantie, 10 of meer instanties draaien, afbreken.
+        if (numProcs >= 10) {
+            this.dispose(); // Gooi het hoofdscherm weg
+            
+            // Foutmelding naar de gebruiker
+            JOptionPane.showMessageDialog(null, "Er mogen maximaal 9 instanties draaien.");
+            
+            // Deze methode stoppen
+            return;
+        }
+        
+        Integer windowWidth = this.getBounds().width + 10;
+        Integer windowHeight = this.getBounds().height + 10;
+        
+        // Locatie van het meest links-bovenste schermpje
+        xPos = 5;
+        yPos = 5;
+        
+        for (int i = 1; i < numProcs; i++) {
+            xPos += windowWidth; // Tel 1 windowbreedte bij de xPos op
+            
+            // Als de xPos groter is dan 3 schermpjes langs elkaar
+            if (xPos+5 > 3 * windowWidth) {
+                xPos = 5; // xPos terug op helemaal links
+                yPos += windowHeight; // yPos 1 windowhoogte groter
+            }
+        }
+        
+        this.setLocation(xPos, yPos);
+        
+        // Maak een Engine object aan, met wereldid gelijk aan het aantal openstaande schermpjes
+        this.eng = new Wereld(this, numProcs);
+  
+        // Maak een plaatje aan in het geheugen om op te tekenen
+        // Zodra plaatje klaar is schrijven we deze naar het Form
+        // Dit om haperende graphics te voorkomen (double buffering)
+        offscreen = createImage(FieldOffsetX + Wereld.getCellSize() * Wereld.getFieldSize(), FieldOffsetY + Wereld.getCellSize() * Wereld.getFieldSize());
+        bufferGraphics = offscreen.getGraphics(); 
+    }
+    
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(Hoofdscherm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(Hoofdscherm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(Hoofdscherm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(Hoofdscherm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new Hoofdscherm().setVisible(true);
+            }
+        });
+    }
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        btnStartStop = new javax.swing.JButton();
+        btnStap = new javax.swing.JButton();
+        sldSnelheid = new javax.swing.JSlider();
+        jButton2 = new javax.swing.JButton();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("BeestenSim - Wereld 1 [PAUSED]");
+        setBounds(new java.awt.Rectangle(0, 0, 400, 400));
+        setResizable(false);
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                formMouseClicked(evt);
+            }
+        });
+
+        btnStartStop.setText(">");
+        btnStartStop.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnStartStopActionPerformed(evt);
+            }
+        });
+
+        btnStap.setText("Stap");
+        btnStap.setEnabled(false);
+        btnStap.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnStapActionPerformed(evt);
+            }
+        });
+
+        sldSnelheid.setMaximum(1000);
+        sldSnelheid.setMinimum(1);
+        sldSnelheid.setToolTipText("");
+        sldSnelheid.setValue(300);
+
+        jButton2.setText("Opslaan");
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(btnStartStop)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnStap)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(sldSnelheid, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton2)
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap(298, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton2)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnStartStop)
+                        .addComponent(btnStap))
+                    .addComponent(sldSnelheid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void formMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseClicked
+        /* Er is met de muis op het hoofdscherm geklikt, zoek uit
+         * of deze klik in het speelveld was, en zo ja welk vakje.
+         */
+        
+        // Als er buiten het veld geklikt wordt, methode afbreken.
+        if ((evt.getX() - this.FieldOffsetX) > Wereld.getCellSize()*Wereld.getFieldSize() ||
+            (evt.getY() - this.FieldOffsetY) > Wereld.getCellSize()*Wereld.getFieldSize())
+            return;
+        
+        // Veldpositie bepalen
+        Point clickPos = new Point();
+        clickPos.x = (int)Math.ceil((evt.getX() - this.FieldOffsetX) / Wereld.getCellSize());
+        clickPos.y = (int)Math.ceil((evt.getY() - this.FieldOffsetY) / Wereld.getCellSize());
+        
+        // Stuur de click door naar de Engine.
+        eng.VeldKlik(clickPos);
+    }//GEN-LAST:event_formMouseClicked
+
+    private void btnStapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStapActionPerformed
+        eng.SimulatieStap();
+    }//GEN-LAST:event_btnStapActionPerformed
+
+    private void btnStartStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartStopActionPerformed
+        if (eng.getWereldRunning() == false) { // De wereld is gepauzeerd
+            btnStartStop.setText("||");
+            eng.pauseSimulation(false);
+            btnStap.setEnabled(true); // Simulatiestap knop uit
+        }
+        else {
+            btnStartStop.setText(">");
+            eng.pauseSimulation(true);
+            btnStap.setEnabled(false); // Simulatiestap knop uit
+        }
+    }//GEN-LAST:event_btnStartStopActionPerformed
+    
+    public Integer SnelheidInstelling() {
+        return (Integer)this.sldSnelheid.getValue();
+    }
+    
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnStap;
+    private javax.swing.JButton btnStartStop;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JSlider sldSnelheid;
+    // End of variables declaration//GEN-END:variables
+    
+    // Always required for good double-buffering.
+     // This will cause the applet not to first wipe off
+     // previous drawings but to immediately repaint.
+     // the wiping off also causes flickering.
+     // Update is called automatically when repaint() is called.
+    @Override
+    public void update(Graphics g)
+    {
+          paint(g);
+    } 
+    
+    @Override
+    public void paint(Graphics g) {
+        int x, y;
+        Color C;
+        
+        // Teken een zwart vierkant ter grootte van het hele veld
+        bufferGraphics.setColor(new Color(0,0,0));
+        bufferGraphics.fillRect(FieldOffsetX, FieldOffsetY, Wereld.getCellSize() * Wereld.getFieldSize() + 1,
+                   Wereld.getCellSize() * Wereld.getFieldSize() + 1);
+        
+        // Zet alle vakjes op blauw (zee)
+        C = new Color(0, 0, 200);
+        for (x=0;x<Wereld.getFieldSize();x++){ // Loop door de x as
+            for (y=0;y<Wereld.getFieldSize();y++) { // Loop in de huidige x as door de y as
+                kleurHokje(bufferGraphics, x, y, C); // Kleur vakje
+            }
+        }
+
+        // Kleur het eiland
+        C = Color.white; // wit (land)
+        
+        for (x=1;x<Wereld.getFieldSize()-1;x++){ // Loop door de x as
+            for (y=1;y<Wereld.getFieldSize()-1;y++) {// Loop in de huidige x as door de y as
+                kleurHokje(bufferGraphics, x, y, C); // Kleur vakje
+            }
+        }
+        
+        // Teken alle objecten die de engine kent
+        for (BasisObject O : this.eng.getObjecten()) {
+            Point positie = O.getPositie();
+            this.kleurHokje(bufferGraphics, positie.x, positie.y, O.getKleur());
+        }
+        
+        super.paint(g);
+        g.drawImage(offscreen,1,1,this);
+    }
+    
+    // kleur een vakje in met de opgegeven x en y coordinaten met
+    // de opgegeven kleur
+    private void kleurHokje(Graphics G, int x, int y, Color kleur) {
+        // Stel kleur in
+        G.setColor(kleur);
+        
+        // Kleur hokje
+        G.fillRect(FieldOffsetX + (x * Wereld.getCellSize()) + 1,
+                   FieldOffsetY + (y * Wereld.getCellSize()) + 1,
+                   Wereld.getCellSize() - 1,
+                   Wereld.getCellSize() - 1);
+    }
+    
+     // Deze methode werkt de titelbalk van het hoofdscherm bij
+    public void updateHoofdscherm() {
+        if (this.eng.getWereldRunning())
+            this.setTitle("BeestenSim - Wereld " + eng.getWorldID() + " [DRAAIT] - Stap " + eng.getStapNummer().toString());
+        else
+            this.setTitle("BeestenSim - Wereld " + eng.getWorldID() + " [PAUSE] - Stap " + eng.getStapNummer().toString());
+        
+        this.repaint();
+    }
+}
